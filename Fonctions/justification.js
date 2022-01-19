@@ -1,58 +1,4 @@
-require('dotenv').config()
-const { response } = require('express');
-const express = require("express")
-const app = express();
-const jwt = require("jsonwebtoken");
-// const { textJustification } = require('../Fonctions/justification');
-
-
-app.post("/", authenticateToken, (req, res) => {
-    console.log("req.body",req.body)
-    const response1 = textJustification(req.body)
-    // const response = response1 
-    // console.log("response1---------------------------------------------")
-
-    // console.log(response1)
-    // console.log("response---------------------------------------------")
-
-    // console.log(response)
-    // console.log("end---------------------------------------------")
-
-    res.send(response1)
-})
-
-  function authenticateToken(req, res, next) {
-    const authHeader = req.headers['authorization']
-    const token = authHeader && authHeader.split(' ')[1]
-    if (token == null) return res.sendStatus(401)
-  
-    jwt.verify(token, process.env.ACCESS_TOKEN, (err, user) => {
-      if (err) return res.sendStatus(403)
-      req.user = user
-      next()
-    })
-  }
-
-  // function textJustification(inputText){
-  //   // Objectif : Avoir maximum 80 caractère par ligne
-  //   // Bonus : Ne pas couper les mots, à la place rajouter des espaces
-  //   let outputText = "";
-  //   let wordPerLign = 80;
-  //   for (let i = 0; i < inputText.length; i++) {
-  //     if(i%wordPerLign === 0){
-  //       outputText[i] ="\n"
-  //       outputText[i+1] = inputText[i]
-  //       i++;
-  //     } else {
-  //       outputText[i] = inputText[i]
-  //     }
-      
-  //   }
-  // }
-
-
-  
-  function textJustification (initialText){
+function textJustification (initialText){
     let newTxt = initialText;                                               
     let newPieceOftext = [];                                            //Array contenant les lignes
 
@@ -182,5 +128,3 @@ app.post("/", authenticateToken, (req, res) => {
     // console.log(spaceText)
     return spaceText;
   }
-
-module.exports = app;

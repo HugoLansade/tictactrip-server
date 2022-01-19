@@ -6,6 +6,8 @@ const cors = require('cors')
 app.use(cors())
 app.use(express.json())  
 
+
+
 let refreshTokens = []
 
 app.post('/api/token', (req, res) => {
@@ -24,4 +26,7 @@ function generateAcessToken(user){
     return jwt.sign(user, process.env.ACCESS_TOKEN, {expiresIn : '30s'})
 }
 
-app.listen(2000)
+app.listen(process.env.PORT_AUTH, function(err){
+    if (err) console.log(err);
+    console.log(">>>>Server authentification listening on PORT", process.env.PORT_AUTH);
+});
