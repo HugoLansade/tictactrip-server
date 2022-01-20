@@ -1,4 +1,5 @@
 require('dotenv').config()
+require("./configs/mongo");
 const express = require("express")
 const app = express();
 const jwt = require("jsonwebtoken")
@@ -7,31 +8,21 @@ const userModel = require('./models/User');
 app.use(cors())
 app.use(express.json())  
 
-// app.post('/api/token', async (req, res) => {
-//     const email = req.body.email
-//     // const loginDate = Date.now();
-//     // const wordsJustified = 0;
-//     // console.log("body", req.body)
+app.post('/api/token', async (req, res) => {
+    const email = req.body.email
+    const user = {email : email}
 
-//     // console.log("login email", email)
-//     // console.log("date", loginDate)
+    const accessToken = generateAccessToken(user)
 
-//     // const user = {email : email, date : loginDate, nbCharacterUsed : wordsJustified }
-//     const user = {email : email}
-
-//     const accessToken = generateAccessToken(user)
-
-//     try {
-//         await userModel.create({ token : accessToken, email : email, emissionDate : Date.now(), nbJustifiedCharactere :  0});
-//         res.status(201);
-//     } catch (error) {
-//         console.log(error)
-//         next(error);
-//     }
-//     // const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN)
-//     // refreshTokens.push(refreshToken) // ici on devrait stocker dans une base de donnée
-//     res.json({accessToken : accessToken}) //, refreshToken : refreshToken
-// })
+    try {
+        await userModel.create({ token : accessToken, email : email, emissionDate : Date.now(), nbJustifiedCharactere :  0});
+        res.status(201);
+    } catch (error) {
+        console.log(error)
+        next(error);
+    }
+    res.json({accessToken : accessToken})
+})
 
 function generateAccessToken(user){
     return jwt.sign(user, process.env.ACCESS_TOKEN) //, {expiresIn : '30s'}

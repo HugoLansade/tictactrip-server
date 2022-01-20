@@ -8,7 +8,7 @@ app.use(cors())
 app.use(express.text());
 
 let text = require("./routes/text.js")
-app.use("/api/justify", text);
+// app.use("/api/justify", text);
 
 
 app.listen(process.env.PORT_TEXT, function(err){
