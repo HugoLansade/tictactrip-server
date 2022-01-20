@@ -8,7 +8,7 @@ const userModel = require('./models/User');
 app.use(cors())
 app.use(express.json())  
 
-app.post('/api/token', async (req, res) => {
+app.post('/api/token', async (req, res, next) => {
     const email = req.body.email
     const user = {email : email}
 
