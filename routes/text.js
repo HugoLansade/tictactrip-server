@@ -6,8 +6,8 @@ const jwt = require("jsonwebtoken");
 // const { textJustification } = require('../Fonctions/justification');
 
 
-app.post("/", authenticateToken, (req, res) => {
-    console.log("req.body",req.body)
+app.post("/", authenticateToken,limitRate, (req, res) => {
+    // console.log("req.body",req.body)
     const response1 = textJustification(req.body)
     // const response = response1 
     // console.log("response1---------------------------------------------")
@@ -33,22 +33,34 @@ app.post("/", authenticateToken, (req, res) => {
     })
   }
 
-  // function textJustification(inputText){
-  //   // Objectif : Avoir maximum 80 caractère par ligne
-  //   // Bonus : Ne pas couper les mots, à la place rajouter des espaces
-  //   let outputText = "";
-  //   let wordPerLign = 80;
-  //   for (let i = 0; i < inputText.length; i++) {
-  //     if(i%wordPerLign === 0){
-  //       outputText[i] ="\n"
-  //       outputText[i+1] = inputText[i]
-  //       i++;
-  //     } else {
-  //       outputText[i] = inputText[i]
-  //     }
-      
-  //   }
-  // }
+  function limitRate(req,res,next){
+    const authHeader = req.headers['authorization']
+    const token = authHeader && authHeader.split(' ')[1]
+    const decodedToken = jwt.decode(token)
+
+    const wasCreated = Date.now() - decodedToken.date;
+    const oneDay = 8.64*10^7;
+    const wordsLimit = 80000;
+    const currentWordsJustified = req.body.length;
+
+    if(decodedToken.wordsJustified < wordsLimit){
+      console.log(`current  = ${currentWordsJustified} + decodedToken.wordsJustified = ${decodedToken.wordsJustified} =`)
+
+      decodedToken.wordsJustified = currentWordsJustified + 10;
+      console.log("Egale a ca :",decodedToken.wordsJustified)
+    }
+    //Check if needs to refresh the token
+    if(wasCreated > oneDay) decodedToken.wordsJustified = 0;
+    //Check if number of words is below
+    if(wasCreated < oneDay && decodedToken.wordsJustified > wordsLimit ){
+      return res.sendStatus(402)
+    }
+   
+    console.log(decodedToken)
+    console.log(wasCreated)
+
+    next()
+  }
 
 
   
@@ -151,7 +163,7 @@ app.post("/", authenticateToken, (req, res) => {
   
   function addSpace2 (piecesOfText) {
     let spaceText = piecesOfText.map((pieceOfText) => {
-      let missingSpaces = 81 - pieceOfText.length    
+      let missingSpaces = 82 - pieceOfText.length    
       let arrText = pieceOfText.split(' ')
       let nbWords = arrText.length;
       while(missingSpaces){
