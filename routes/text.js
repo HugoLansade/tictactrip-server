@@ -7,22 +7,14 @@ const jwt = require("jsonwebtoken");
 
 
 app.post("/", authenticateToken,limitRate, (req, res) => {
-    // console.log("req.body",req.body)
-    const response1 = textJustification(req.body)
-    // const response = response1 
-    // console.log("response1---------------------------------------------")
+    const response = textJustification(req.body)
 
-    // console.log(response1)
-    // console.log("response---------------------------------------------")
-
-    // console.log(response)
-    // console.log("end---------------------------------------------")
-
-    res.send(response1)
+    res.send(response)
 })
 
   function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization']
+    // console.log('auth header :', authHeader )
     const token = authHeader && authHeader.split(' ')[1]
     if (token == null) return res.sendStatus(401)
   
@@ -34,6 +26,11 @@ app.post("/", authenticateToken,limitRate, (req, res) => {
   }
 
   function limitRate(req,res,next){
+    // Va a la base de donnée 
+    // Regarde qui possède ce token
+    // Prend les infos : date d'émission + nb de charactère justifié
+    // on update ces infos en les incrémentant
+    // on continue normal.
     const authHeader = req.headers['authorization']
     const token = authHeader && authHeader.split(' ')[1]
     const decodedToken = jwt.decode(token)
@@ -43,18 +40,40 @@ app.post("/", authenticateToken,limitRate, (req, res) => {
     const wordsLimit = 80000;
     const currentWordsJustified = req.body.length;
 
-    if(decodedToken.wordsJustified < wordsLimit){
-      console.log(`current  = ${currentWordsJustified} + decodedToken.wordsJustified = ${decodedToken.wordsJustified} =`)
+    if(decodedToken.nbCharacterUsed < wordsLimit){ // SI c'est inf à la limite fixé on permet l'accès
+      // console.log(`current  = ${currentWordsJustified} + decodedToken.wordsJustified = ${decodedToken.nbCharacterUsed} =`)
 
-      decodedToken.wordsJustified = currentWordsJustified + 10;
-      console.log("Egale a ca :",decodedToken.wordsJustified)
+      let newNbOfCharacterUsed = currentWordsJustified + decodedToken.nbCharacterUsed;
+      const user = {email : req.body.email, date : req.body.date, nbCharacterUsed : newNbOfCharacterUsed }
+
+      const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN)
+      // Onn met le token dans les headers >>>>
+      console.log(">>>>>>>")
+
+      console.log(authHeader)
+      const tokenInfoArray = authHeader.split(' ') // on remplace le token par le refresh token
+      console.log(tokenInfoArray)
+     
+      const hey = tokenInfoArray.splice(1,1,refreshToken)
+      console.log(tokenInfoArray)
+
+      console.log("------------")
+    
+      console.log(tokenInfoArray)
+    console.log("------------")
+      const finalRefreshToken = tokenInfoArray.reduce((acc,val) => acc+=val)
+      console.log("------------")
+    
+      console.log(finalRefreshToken)
+    console.log("------------")
+
+      res.headers['authorization'] = finalRefreshToken;
     }
     //Check if needs to refresh the token
-    if(wasCreated > oneDay) decodedToken.wordsJustified = 0;
+    if(wasCreated > oneDay) decodedToken.nbCharacterUsed = 0;
     //Check if number of words is below
-    if(wasCreated < oneDay && decodedToken.wordsJustified > wordsLimit ){
+    if(wasCreated < oneDay && decodedToken.nbCharacterUsed > wordsLimit )
       return res.sendStatus(402)
-    }
    
     console.log(decodedToken)
     console.log(wasCreated)
@@ -62,6 +81,53 @@ app.post("/", authenticateToken,limitRate, (req, res) => {
     next()
   }
 
+
+  // async function dbCheck (req, res, next){
+  //    // Va a la base de donnée 
+  //   // Regarde qui possède ce token
+  //   // Prend les infos : date d'émission + nb de charactère justifié
+  //   // on update ces infos en les incrémentant
+  //   // on continue normal.
+  //   try {
+      
+  //   } catch (error) {
+  //     console.log(error)
+  //     next(error);
+      
+  //   }
+  //   next()
+
+  // }
+
+  app.post('/api/token', async (req, res) => {
+    const email = req.body.email
+    // const loginDate = Date.now();
+    // const wordsJustified = 0;
+    // console.log("body", req.body)
+
+    // console.log("login email", email)
+    // console.log("date", loginDate)
+
+    // const user = {email : email, date : loginDate, nbCharacterUsed : wordsJustified }
+    const user = {email : email}
+
+    const accessToken = generateAccessToken(user)
+
+    try {
+        await userModel.create({ token : accessToken, email : email, emissionDate : Date.now(), nbJustifiedCharactere :  0});
+        res.status(201);
+    } catch (error) {
+        console.log(error)
+        next(error);
+    }
+    // const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN)
+    // refreshTokens.push(refreshToken) // ici on devrait stocker dans une base de donnée
+    res.json({accessToken : accessToken}) //, refreshToken : refreshToken
+})
+
+function generateAccessToken(user){
+    return jwt.sign(user, process.env.ACCESS_TOKEN) //, {expiresIn : '30s'}
+}
 
   
   function textJustification (initialText){
@@ -163,7 +229,7 @@ app.post("/", authenticateToken,limitRate, (req, res) => {
   
   function addSpace2 (piecesOfText) {
     let spaceText = piecesOfText.map((pieceOfText) => {
-      let missingSpaces = 82 - pieceOfText.length    
+      let missingSpaces = 81 - pieceOfText.length    
       let arrText = pieceOfText.split(' ')
       let nbWords = arrText.length;
       while(missingSpaces){

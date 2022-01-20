@@ -2,6 +2,8 @@ var express = require('express');
 require("dotenv").config();
 const cors = require('cors')
 const app = express();
+require("./configs/mongo");
+
 app.use(cors())
 app.use(express.text());
 
