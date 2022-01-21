@@ -16,7 +16,6 @@ app.post("/", authenticateToken,dbCheck, (req, res) => { //,limitRate
 
   function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization']
-    // console.log('auth header :', authHeader )
     const token = authHeader && authHeader.split(' ')[1]
     if (token == null) return res.sendStatus(401)
   
@@ -31,9 +30,6 @@ app.post("/", authenticateToken,dbCheck, (req, res) => { //,limitRate
 
 
   async function dbCheck (req, res, next){
-     // Va a la base de donnée 
-    // Regarde qui possède ce token
-    // Prend les infos : date d'émission + nb de charactère justifié   
     
     // GET INFO
     const authHeader = req.headers['authorization']
@@ -49,75 +45,31 @@ app.post("/", authenticateToken,dbCheck, (req, res) => { //,limitRate
 
     //VERIFY INFO
     const wasCreated = Date.now() - emissionDate;
-    const oneDay = 8.64*10^7;
+    const oneDay = 8.64*Math.pow(10,7);
     const wordsLimit = 80000;
     const currentWordsJustified = req.body.length;
-    //1) Check si le token a été créée il y a plus de 24h
-    if(wasCreated > oneDay) nbJustifiedCharactere = 0;
-    //2) Si il est en dessous de la limite de mot on incremente 
-    if(nbJustifiedCharactere < wordsLimit){
-      nbJustifiedCharactere += currentWordsJustified;
-    }    
-    //3) Check si on a moins de la limite de mot en 24h
-    if(wasCreated < oneDay && nbJustifiedCharactere > wordsLimit )
-      return res.sendStatus(402)
 
+      //1) Si il est en dessous de la limite de mot on incremente 
+      if(nbJustifiedCharactere < wordsLimit){
+        nbJustifiedCharactere += currentWordsJustified;
+      }    
+      //2) Check si on a moins de la limite de mot en 24h
+      if(wasCreated < oneDay && nbJustifiedCharactere >= wordsLimit )
+      return res.sendStatus(402)
+        
     // UPDATE INFO IN DB
+    try {
+      await userModel.findOneAndUpdate({token : token},{nbJustifiedCharactere : nbJustifiedCharactere}, {new: true})
+    } catch (error) {
+      console.log(error)
+      next(error);  
+    }
     next()
   }
+  
+//TODO 
+  // justification text à améliorer
 
-   async function limitRate(req,res,next){
-      // on update ces infos en les incrémentant
-      const authHeader = req.headers['authorization']
-      const token = authHeader && authHeader.split(' ')[1]
-      const decodedToken = jwt.decode(token)
-  
-      const wasCreated = Date.now() - decodedToken.date;
-      const oneDay = 8.64*10^7;
-      const wordsLimit = 80000;
-      const currentWordsJustified = req.body.length;
-  
-      if(decodedToken.nbCharacterUsed < wordsLimit){ // SI c'est inf à la limite fixé on permet l'accès
-        // console.log(`current  = ${currentWordsJustified} + decodedToken.wordsJustified = ${decodedToken.nbCharacterUsed} =`)
-  
-        let newNbOfCharacterUsed = currentWordsJustified + decodedToken.nbCharacterUsed;
-        const user = {email : req.body.email, date : req.body.date, nbCharacterUsed : newNbOfCharacterUsed }
-  
-        const refreshToken = jwt.sign(user, process.env.REFRESH_TOKEN)
-        // Onn met le token dans les headers >>>>
-        console.log(">>>>>>>")
-  
-        console.log(authHeader)
-        const tokenInfoArray = authHeader.split(' ') // on remplace le token par le refresh token
-        console.log(tokenInfoArray)
-       
-        const hey = tokenInfoArray.splice(1,1,refreshToken)
-        console.log(tokenInfoArray)
-  
-        console.log("------------")
-      
-        console.log(tokenInfoArray)
-      console.log("------------")
-        const finalRefreshToken = tokenInfoArray.reduce((acc,val) => acc+=val)
-        console.log("------------")
-      
-        console.log(finalRefreshToken)
-      console.log("------------")
-  
-        res.headers['authorization'] = finalRefreshToken;
-      }
-      //Check if needs to refresh the token
-      if(wasCreated > oneDay) decodedToken.nbCharacterUsed = 0;
-      //Check if number of words is below
-      if(wasCreated < oneDay && decodedToken.nbCharacterUsed > wordsLimit )
-        return res.sendStatus(402)
-     
-      console.log(decodedToken)
-      console.log(wasCreated)
-  
-      next()
-    }
-  
   function textJustification (initialText){
     let newTxt = initialText;                                               
     let newPieceOftext = [];                                            //Array contenant les lignes
@@ -135,7 +87,7 @@ app.post("/", authenticateToken,dbCheck, (req, res) => { //,limitRate
     let finalString = newPieceOfText.reduce((acc, val) => acc+=val)
     
     console.log("finalString")
-    console.log(finalString)
+    // console.log(finalString)
     return finalString
  }
   
