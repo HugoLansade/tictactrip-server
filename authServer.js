@@ -9,11 +9,12 @@ app.use(cors())
 app.use(express.json())  
 
 app.post('/api/token', async (req, res, next) => {
+    // GET USER DATA
     const email = req.body.email
     const user = {email : email}
-
+        // 1) Création du token avec données uitilisateur
     const accessToken = generateAccessToken(user)
-
+        // 2) Création dans la base de donnée du token utilisateur
     try {
         await userModel.create({ token : accessToken, email : email, emissionDate : Date.now(), nbJustifiedCharactere :  0});
         res.status(201);
@@ -25,7 +26,7 @@ app.post('/api/token', async (req, res, next) => {
 })
 
 function generateAccessToken(user){
-    return jwt.sign(user, process.env.ACCESS_TOKEN) //, {expiresIn : '30s'}
+    return jwt.sign(user, process.env.ACCESS_TOKEN)
 }
 
 app.listen(process.env.PORT_AUTH, function(err){

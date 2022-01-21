@@ -8,26 +8,25 @@ const userModel = require('../models/User');
 // const { textJustification } = require('../Fonctions/justification');
 
 
-app.post("/", authenticateToken,dbCheck, (req, res) => { //,limitRate
+app.post("/", authenticateToken,dbCheck, (req, res) => {
+  // TEXT JUSTIFICATION && SEND TO FRONT
     const response = textJustification(req.body)
-
     res.send(response)
 })
 
   function authenticateToken(req, res, next) {
+    // GET TOKEN IN HEADER
     const authHeader = req.headers['authorization']
     const token = authHeader && authHeader.split(' ')[1]
+      // 1) Si il n'existe pas => unAuthorized
     if (token == null) return res.sendStatus(401)
-  
+      // 2) Check infos ? incorrect => Forbidden : Passes infos
     jwt.verify(token, process.env.ACCESS_TOKEN, (err, user) => {
       if (err) return res.sendStatus(403)
       req.user = user
       next()
     })
   }
-
-  
-
 
   async function dbCheck (req, res, next){
     

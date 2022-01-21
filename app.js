@@ -7,6 +7,7 @@ require("./configs/mongo");
 app.use(cors())
 app.use(express.text());
 
+// Préfixage des routes
 let text = require("./routes/text.js")
 app.use("/api/justify", text);
 
