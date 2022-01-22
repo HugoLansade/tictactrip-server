@@ -65,9 +65,7 @@ app.post("/", authenticateToken,dbCheck, (req, res) => {
     }
     next()
   }
-  
-//TODO 
-  // justification text à améliorer
+
 
   function textJustification (initialText){
     let newTxt = initialText;                                               
@@ -94,7 +92,7 @@ app.post("/", authenticateToken,dbCheck, (req, res) => {
     // console.log("Im splacing")
     let pieceOfText = "";
     let nexTxt ="";
-    if(txt[80] === " "){
+    if(txt[79] === " "){
       pieceOfText = txt.slice(0,80);
       nexTxt = txt.replace(pieceOfText,"");
     } else { 
@@ -172,7 +170,7 @@ app.post("/", authenticateToken,dbCheck, (req, res) => {
       let arrText = pieceOfText.split(' ')
       let nbWords = arrText.length;
       while(missingSpaces){
-       let spacePosition = Math.floor(Math.random() * (nbWords-1 - 2) + 2) //on détermine la position où l'on met un espace le min =1 pour éviter de mettre un espace premiere position max = mots-1 pour meme raison en fin PEUT ETRE QU4IL FAUT METTRE 2 !!!!!!!!!!!!!!!!!!!!!!!!!!!
+       let spacePosition = Math.floor(Math.random() * (nbWords - 2) + 2) //on détermine la position où l'on met un espace le min =1 pour éviter de mettre un espace premiere position max = mots-1 pour meme raison en fin PEUT ETRE QU4IL FAUT METTRE 2 !!!!!!!!!!!!!!!!!!!!!!!!!!!
        arrText.splice(spacePosition,0," ")
         missingSpaces--
       }
