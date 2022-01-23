@@ -1,21 +1,12 @@
-const express = require ("express");
-const mongoose = require ("mongoose");
-const app = express ();
-const dotenv = require ("dotenv");
-require('dotenv').config();
-// const pinRoute = require ('./routes/pin');
+const mongoose = require("mongoose");
+const dotenv = require("dotenv");
 
 dotenv.config();
 
-app.use(express.json())
-
 mongoose
-  .connect(
-    process.env.MONGODB_URI,            //  <--- UPDATE
-    {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    }
-	)
-  .then((x) => console.log('Connected to the DB'))
-  .catch(err => console.error('Error while connecting to DB', err));
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("Connected to the DB"))
+  .catch((err) => console.error("Error while connecting to DB", err));
