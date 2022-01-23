@@ -1,10 +1,18 @@
 require("dotenv").config();
-require("./configs/mongo");
-const path = require("path");
+require("./src/configs/mongo");
 const express = require("express");
-const jwt = require("jsonwebtoken");
 const cors = require("cors");
-const userModel = require("./models/User");
+const userModel = require("./src/models/user");
+
+const {
+  textJustification,
+} = require("./src/controllers/formatter/justification");
+
+const {
+  authenticateToken,
+  dbCheck,
+  generateAccessToken,
+} = require("./src/controllers/auth/tokenManagement");
 
 const app = express();
 
@@ -12,9 +20,10 @@ app.use(cors());
 app.use(express.text());
 app.use(express.json());
 
-// Préfixage des routes
-let text = require("./routes/text.js");
-app.use("/api/justify", text);
+app.post("/api/justify", authenticateToken, dbCheck, (req, res) => {
+  const response = textJustification(req.body);
+  res.send(response);
+});
 
 // TOKEN CREATION
 app.post("/api/token", async (req, res, next) => {
@@ -29,7 +38,7 @@ app.post("/api/token", async (req, res, next) => {
       token,
       email,
       emissionDate: Date.now(),
-      nbJustifiedCharactere: 0,
+      nbJustifiedCharacters: 0,
     });
     res.status(201);
   } catch (error) {
@@ -38,26 +47,6 @@ app.post("/api/token", async (req, res, next) => {
   }
   res.json({ token });
 });
-
-function generateAccessToken(user) {
-  return jwt.sign(user, process.env.ACCESS_TOKEN);
-}
-
-// DEPLOY FEATURES
-app.use(express.static(path.join(__dirname, "public/build")));
-
-app.use("/api/*", (req, res, next) => {
-  const error = new Error("Ressource not found.");
-  error.status = 404;
-  next(error);
-});
-
-if (process.env.NODE_ENV === "production") {
-  app.use("*", (req, res, next) => {
-    // If no routes match, send them the React HTML.
-    res.sendFile(path.join(__dirname, "public/build/index.html"));
-  });
-}
 
 app.listen(process.env.PORT_TEXT, (err) => {
   if (err) console.log(err);

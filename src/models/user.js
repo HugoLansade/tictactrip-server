@@ -14,7 +14,7 @@ const UserSchema = new mongoose.Schema({
   emissionDate: {
     type: Date,
   },
-  nbJustifiedCharactere: {
+  nbJustifiedCharacters: {
     type: Number,
     default: 0,
   },
