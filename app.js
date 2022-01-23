@@ -48,9 +48,9 @@ app.post("/api/token", async (req, res, next) => {
   res.json({ token });
 });
 
-app.listen(process.env.PORT_TEXT, (err) => {
+app.listen(process.env.PORT, (err) => {
   if (err) console.log(err);
-  console.log(">>>>Server text listening on PORT", process.env.PORT_TEXT);
+  console.log(">>>>Server text listening on PORT", process.env.PORT);
 });
 
 module.exports = app;
