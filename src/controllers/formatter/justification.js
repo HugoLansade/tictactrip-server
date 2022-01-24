@@ -1,40 +1,44 @@
+// Global function in wich we go through the text as a string and slice it in pieces of 80
+// We make an assembly of all pieces at the end
 function textJustification(initialText) {
   let newTxt = initialText;
-  let newPieceOftext = []; //Array contenant les lignes
+  let newPieceOftext = []; //Array containing each lign of 80
+  let charByLign = 80;
 
-  while (newTxt.length > 80) {
-    // Tant que notre texte est plus grand que 80 caractére on exécute la fonction
-    let body = spliceText(newTxt);
-    newTxt = body.nexTxt;
-    newPieceOftext.push(body.pieceOfText + "\n"); // On récupère la ligne traitée et on lui ajoute un retour à la ligne
+  // While our text is bigger than chars limit we continue looping
+  while (newTxt.length > charByLign) {
+    let body = spliceText(newTxt, charByLign); // return an object containing a pieceOfText with a max size of 80 and the text to which we removed the pieceOfText
+    newTxt = body.nexTxt; // Update the text with the new one
+    newPieceOftext.push(body.pieceOfText + "\n"); // We group all pieceOfText in an array, this array separate the pieces with a line break
   }
-  newPieceOfText = addSpace2(newPieceOftext);
+  newPieceOfText = addSpace2(newPieceOftext, charByLign); // return an array with pieces of txt and the exact number of space require to make a lign of 80 chars
 
-  let lastPieceOfText = newTxt.slice(0, newTxt.length); // on ne prend pas en compte le cas si le text fini pile poile à 80
+  let lastPieceOfText = newTxt.slice(0, newTxt.length); // The last piece of text is under 80 or equal so we dont want to justify it, that is why we push it after adding space
 
-  newPieceOfText.push(lastPieceOfText);
-  let finalString = newPieceOfText.reduce((acc, val) => (acc += val));
+  newPieceOfText.push(lastPieceOfText); // Regroup all pieces
+  let finalString = newPieceOfText.reduce((acc, val) => (acc += val)); // Joining all pieces together as a single string
 
-  console.log("Text justified");
-  // console.log(finalString)
   return finalString;
 }
 
-function spliceText(txt) {
-  // console.log("Im splacing")
+function spliceText(txt, charByLign) {
   let pieceOfText = "";
   let nexTxt = "";
-  if (txt[79] === " ") {
-    pieceOfText = txt.slice(0, 80);
+  if (txt[charByLign - 1] === " ") {
+    // If the last char is a space we take the all lign
+    pieceOfText = txt.slice(0, charByLign);
+    // We remove from the text the lign containing the piece of text
     nexTxt = txt.replace(pieceOfText, "");
   } else {
-    let letterBefore = countLetterBefore(80, txt);
-    pieceOfText = txt.slice(0, 80 - letterBefore);
+    // If the 80 char is in a word we look for the start of the word and then slice before this word
+    let letterBefore = countLetterBefore(charByLign, txt); // return an index of where we can slice
+    pieceOfText = txt.slice(0, charByLign - letterBefore);
     nexTxt = txt.replace(pieceOfText, "");
   }
   return { pieceOfText, nexTxt };
 }
 
+// Find the start of a word and return its index
 function countLetterBefore(index, text) {
   let count = 0;
   while (text[index] !== " ") {
@@ -44,81 +48,29 @@ function countLetterBefore(index, text) {
   return count;
 }
 
-// V3 Add space
-
-function addSpace(piecesOfText) {
+function addSpace2(piecesOfText, charByLign) {
+  // we go through the all tab containing pieces of text that need to have space to reach 80 chars
   let spaceText = piecesOfText.map((pieceOfText) => {
-    let missingSpaces = 81 - pieceOfText.length;
-    if (missingSpaces) {
-      //On divise direct le text en 8 pour avoir 3 espaces
-      //Ca n'est pas parfait car on aura souvent plus de trou à l'arriere qu'a l'avant
-      let space = 80 / 8; //8 au hasard
-      // on a donc 8 zones d'insertion on ne compte pas les extrémités
-      // on fait txt[8] et la si on atterit pas sur un mot on regarde l'espace le plus proche
-      for (let i = 1; i < 8; i++) {
-        pieceOfText[space * i];
-      }
-
-      while (missingSpaces) {
-        pieceOfText = pieceOfText.replace(" ", "  "); //on remplace un espace par 2 => on ajoute un seul espace
-        // console.log(pieceOfText)
-
-        missingSpaces--;
-      }
-    }
-    return pieceOfText;
-  });
-  console.log("exit");
-
-  console.log(spaceText);
-}
-
-function countLetterAfter(index, text) {
-  let count = 0;
-  while (text[index] !== " ") {
-    index++;
-    count++;
-  }
-  return count;
-}
-// let str2 = "la la la"
-// let str3 = str2.replace("la","el")
-// console.log(str3)
-
-function test(text, letterPerLign, nbSpace) {
-  let numberOfSpace = letterPerLign / nbSpace;
-}
-
-function addSpace2(piecesOfText) {
-  let spaceText = piecesOfText.map((pieceOfText) => {
-    let missingSpaces = 81 - pieceOfText.length;
-    let arrText = pieceOfText.split(" ");
+    let missingSpaces = charByLign + 1 - pieceOfText.length; // calculation of missing spaces
+    let arrText = pieceOfText.split(" "); //remove the initial space to be able to add space at correct index
     let nbWords = arrText.length;
     while (missingSpaces) {
-      let spacePosition = Math.floor(Math.random() * (nbWords - 2) + 2); //on détermine la position où l'on met un espace le min =1 pour éviter de mettre un espace premiere position max = mots-1 pour meme raison en fin PEUT ETRE QU4IL FAUT METTRE 2 !!!!!!!!!!!!!!!!!!!!!!!!!!!
-      arrText.splice(spacePosition, 0, " ");
+      // We asign a random position (yes it can be x time the same for now but i'm still working on it)
+      let spacePosition = Math.floor(Math.random() * (nbWords - 2) + 2);
+      arrText.splice(spacePosition, 0, " "); //adding space
       missingSpaces--;
     }
-    // Maintenant on remet les espaces initiaux
+    // We add the initial space
     arrText = arrText.map((mot) => {
-      //apres chaque mot qui n'est pas un espace je met un espace
+      // After each word that is not a space I add a space
       if (mot !== "" && mot !== " ") {
         mot = mot + " ";
       }
-      // console.log(mot)
-
       return mot;
     });
-    // return arrText;
-    // console.log(arrText)
 
-    let temp = arrText.reduce((acc, val) => (acc += val));
-    // console.log("temp")
-    // console.log(temp)
-
-    return temp;
+    return arrText.reduce((acc, val) => (acc += val)); // we make an ssembly of each word to create and return a string lign of 80
   });
-  // console.log(spaceText)
   return spaceText;
 }
 

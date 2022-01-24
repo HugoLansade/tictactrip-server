@@ -5,8 +5,8 @@ dotenv.config();
 
 mongoose
   .connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+    useNewUrlParser: true, // allow to go to the old mongoose version of parser if not working
+    useUnifiedTopology: true, // allow to use the MongoDB driver's new connection management engine
   })
   .then(() => console.log("Connected to the DB"))
   .catch((err) => console.error("Error while connecting to DB", err));

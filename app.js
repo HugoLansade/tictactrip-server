@@ -20,6 +20,7 @@ app.use(cors());
 app.use(express.text());
 app.use(express.json());
 
+// Text justification with two middlewares to check if it is the good token and to verify justifications request limit
 app.post("/api/justify", authenticateToken, dbCheck, (req, res) => {
   const response = textJustification(req.body);
   res.send(response);
@@ -30,9 +31,9 @@ app.post("/api/token", async (req, res, next) => {
   // GET USER DATA
   const { email } = req.body;
   const user = { email };
-  // 1) Création du token avec données utilisateur
+  // 1) Creation of the token with user data
   const token = generateAccessToken(user);
-  // 2) Création dans la base de donnée du token utilisateur
+  // 2) Creation in mongo of the token with the initial state
   try {
     await userModel.create({
       token,

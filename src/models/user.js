@@ -9,7 +9,7 @@ const UserSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    // unique : true, //devrait etre unique mais pour les tests plus simple de pouvoir entrer le meme email à plusieurs reprise
+    // unique : true, //should be unique but for testing it's easier to just give the same email
   },
   emissionDate: {
     type: Date,

@@ -5,9 +5,9 @@ function authenticateToken(req, res, next) {
   // GET TOKEN IN HEADER
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
-  // 1) Si il n'existe pas => unAuthorized
+  // 1) If doesn't exist => unAuthorized
   if (token == null) return res.sendStatus(401);
-  // 2) Check infos ? incorrect => Forbidden : Passes infos
+  // 2) Check infos ? incorrect => Forbidden : Pass infos
   jwt.verify(token, process.env.ACCESS_TOKEN, (err, user) => {
     if (err) {
       console.log(err);
@@ -36,15 +36,22 @@ async function dbCheck(req, res, next) {
 
   //VERIFY INFO
   const wasCreated = Date.now() - emissionDate;
+  // Number of milisecond in 24h
   const oneDay = 8.64 * Math.pow(10, 7);
   const charsLimit = 80000;
   const currentCharsJustified = req.body.length;
 
-  //1) Si il est en dessous de la limite de mot on incremente
+  //1) If he didnt outpass the word limit we increment
   if (nbJustifiedCharacters < charsLimit) {
     nbJustifiedCharacters += currentCharsJustified;
   }
-  //2) Check si on a moins de la limite de mot en 24h
+  //2) If 24 hours have passed and the user made request that globaly contains less than 80000 characters
+  // We reinitialize the date
+  if (wasCreated > oneDay && nbJustifiedCharacters < charsLimit) {
+    emissionDate = Date.now();
+    wasCreated = 0;
+  }
+  //3) Check if we have less than the wordLimit in 24h
   if (wasCreated < oneDay && nbJustifiedCharacters >= charsLimit)
     return res.sendStatus(402);
 
@@ -52,7 +59,7 @@ async function dbCheck(req, res, next) {
   try {
     await userModel.findOneAndUpdate(
       { token },
-      { nbJustifiedCharacters },
+      { nbJustifiedCharacters, emissionDate },
       { new: true }
     );
   } catch (error) {
