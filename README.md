@@ -25,4 +25,4 @@ Contient deux routes:
 
 ## Lien vers le repertoire contenant le frontend
 
-[Lien vers le code du back](https://github.com/HugoLansade/tictactrip-client).
+[Lien vers le code du front](https://github.com/HugoLansade/tictactrip-client).
