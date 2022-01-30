@@ -51,10 +51,10 @@ function countLetterBefore(index, text) {
 function addSpace2(piecesOfText, charByLign) {
   // we go through the all tab containing pieces of text that need to have space to reach 80 chars
   let spaceText = piecesOfText.map((pieceOfText) => {
-    let missingSpaces = charByLign + 1 - pieceOfText.length; // calculation of missing spaces
+    let missingSpaces = charByLign - pieceOfText.length; // calculation of missing spaces
     let arrText = pieceOfText.split(" "); //remove the initial space to be able to add space at correct index
     let nbWords = arrText.length;
-    while (missingSpaces) {
+    while (missingSpaces - 1) {
       // We asign a random position (yes it can be x time the same for now but i'm still working on it)
       let spacePosition = Math.floor(Math.random() * (nbWords - 2) + 2);
       arrText.splice(spacePosition, 0, " "); //adding space
@@ -69,9 +69,14 @@ function addSpace2(piecesOfText, charByLign) {
       return mot;
     });
 
-    return arrText.reduce((acc, val) => (acc += val)); // we make an ssembly of each word to create and return a string lign of 80
+    return arrText.reduce((acc, val) => (acc += val)); // we make an ssembly of each word to create and return a string lign of 80Z
   });
   return spaceText;
 }
 
-module.exports = { textJustification };
+module.exports = {
+  textJustification,
+  countLetterBefore,
+  spliceText,
+  addSpace2,
+};
