@@ -50,11 +50,12 @@ function countLetterBefore(index, text) {
 
 function addSpace2(piecesOfText, charByLign) {
   // we go through the all tab containing pieces of text that need to have space to reach 80 chars
+  console.log("inn");
   let spaceText = piecesOfText.map((pieceOfText) => {
-    let missingSpaces = charByLign - pieceOfText.length; // calculation of missing spaces
+    let missingSpaces = charByLign + 1 - pieceOfText.length; // calculation of missing spaces
     let arrText = pieceOfText.split(" "); //remove the initial space to be able to add space at correct index
     let nbWords = arrText.length;
-    while (missingSpaces - 1) {
+    while (missingSpaces) {
       // We asign a random position (yes it can be x time the same for now but i'm still working on it)
       let spacePosition = Math.floor(Math.random() * (nbWords - 2) + 2);
       arrText.splice(spacePosition, 0, " "); //adding space

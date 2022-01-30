@@ -14,6 +14,7 @@ test("Have 80 or less character on the output", () => {
   );
 });
 
+// Should remove +1 ligne 55 and add -1 lign 58
 test("Each lines should have 80 chars at the end", () => {
   const piecesOfText = [
     "mes yeux se fermaient si vite que je n’avais pas le temps de me dire: «Je",
@@ -22,10 +23,9 @@ test("Each lines should have 80 chars at the end", () => {
   expect(addSpace2(piecesOfText, charByLign)[0].length).toEqual(80);
 });
 
+// We want to count number of chars from an index to the begining of the word
 test("Give number of character before the start of the word", () => {
   const text = "hello world";
   const index = 7;
   expect(countLetterBefore(index, text)).toBe(2);
 });
-
-// We want that no space are at the end or the begining of lines
